@@ -10,11 +10,11 @@
     }],
     "require": {
         "php": ">=7.3",
-        "agencycoda/mia-core-mezzio": "dev-main",
-        "agencycoda/mia-eloquent-mezzio": "dev-main",
+        "agencycoda/mia-core-mezzio": "v2.x-dev",
+        "agencycoda/mia-eloquent-mezzio": "v2.x-dev",
         "laminas/laminas-crypt": "^3.3",
         "firebase/php-jwt": "5.2.1",
-        "kreait/firebase-php": "5.14.1",
+        "kreait/firebase-php": "^5.14.0",
         "lcobucci/jwt": "4.0.4"
     },
     "autoload": {
