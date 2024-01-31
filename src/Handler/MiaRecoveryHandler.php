@@ -58,14 +58,14 @@ class MiaRecoveryHandler extends \Mia\Core\Request\MiaRequestHandler
             return new JsonResponse(['error' => 'Este email no existe'], 404);
         }
 
-        if ($account->deleted == 1) {
+        if ($account->deleted === 1) {
             return new JsonResponse(['error' => 'Esta cuenta no existe.'], 404);
         }
 
         if ($this->validStatus && $account->status == MIAUser::STATUS_PENDING) {
             return new JsonResponse(['error' => 'Tu cuenta no está activa'], 400);
 
-        } elseif ($this->validStatus && $account->status == MIAUser::STATUS_BLOCKED) {
+        } elseif ($this->validStatus && $account->status === MIAUser::STATUS_BLOCKED) {
             return new JsonResponse(['error' => 'Tu cuenta está bloqueada'], 400);
         }
         
