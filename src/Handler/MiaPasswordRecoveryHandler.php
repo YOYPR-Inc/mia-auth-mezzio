@@ -2,6 +2,8 @@
 
 namespace Mia\Auth\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
+
 /**
  * Description of MiaPasswordRecoveryHandler
  *
@@ -18,12 +20,12 @@ class MiaPasswordRecoveryHandler extends \Mia\Core\Request\MiaRequestHandler
         // Verificar si ya existe la cuenta
         $account = \Mia\Auth\Model\MIAUser::where('email', $email)->first();
         if($account === null){
-            return new \Mia\Core\Diactoros\MiaJsonErrorResponse(-1, 'No existe este mail');
+            return new JsonResponse(['error' => 'This email does not exist'], 400);
         }
         // Buscar si existe el token
         $recovery = \Mia\Auth\Model\MIARecovery::where('user_id', $account->id)->where('token', $token)->where('status', \Mia\Auth\Model\MIARecovery::STATUS_PENDING)->first();
         if($recovery === null){
-            return new \Mia\Core\Diactoros\MiaJsonErrorResponse(-1, 'El token es incorrecto');
+            return new JsonResponse(['error' => 'The token is incorrect'], 400);
         }
         $recovery->status = \Mia\Auth\Model\MIARecovery::STATUS_USED;
         $recovery->save();

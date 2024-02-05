@@ -2,6 +2,7 @@
 
 namespace Mia\Auth\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Mia\Auth\Helper\JwtHelper;
 use Mia\Auth\Model\MIAUser;
 
@@ -52,22 +53,22 @@ class MiaRecoveryHandler extends \Mia\Core\Request\MiaRequestHandler
         $email = $this->getParam($request, 'email', '');
         // Verificar si ya existe la cuenta
         $account = \Mia\Auth\Model\MIAUser::where('email', $email)->first();
-        if($account === null){
-            return new \Mia\Core\Diactoros\MiaJsonResponse(true);
-            //return new \Mia\Core\Diactoros\MiaJsonErrorResponse(-1, 'Este email no existe');
+
+        if ($account === null) {
+            return new JsonResponse(['error' => 'This email does not exist'], 404);
         }
-        if($account->deleted == 1){
-            return new \Mia\Core\Diactoros\MiaJsonResponse(true);
-            //return new \Mia\Core\Diactoros\MiaJsonErrorResponse(-1, 'This account not exist.');
+
+        if ($account->deleted === 1) {
+            return new JsonResponse(['error' => 'This account does not exist.'], 404);
         }
-        // Valid if user is active
-        if($this->validStatus && $account->status == MIAUser::STATUS_PENDING){
-            return new \Mia\Core\Diactoros\MiaJsonResponse(true);
-            //return MiaErrorHelper::toLangEs($request, -4, 'Tu cuenta no está activa', 'Your account is not active.');
-        }else if($this->validStatus && $account->status == MIAUser::STATUS_BLOCKED){
-            return new \Mia\Core\Diactoros\MiaJsonResponse(true);
-            //return MiaErrorHelper::toLangEs($request, -5, 'Tu cuenta esta bloqueada', 'Your account is blocked.');
+
+        if ($this->validStatus && $account->status == MIAUser::STATUS_PENDING) {
+            return new JsonResponse(['error' => 'Your account is not active'], 400);
+
+        } elseif ($this->validStatus && $account->status === MIAUser::STATUS_BLOCKED) {
+            return new JsonResponse(['error' => 'Your account is blocked'], 400);
         }
+        
         // Generar registro de token
         $token = \Mia\Auth\Model\MIAUser::encryptPassword($email . '_' . time() . '_' . $email);
         $recovery = new \Mia\Auth\Model\MIARecovery();
@@ -77,7 +78,6 @@ class MiaRecoveryHandler extends \Mia\Core\Request\MiaRequestHandler
         $recovery->save();
         
         $lang = $this->getParam($request, 'lang', 'en');
-        /* @var $sendgrid \Mia\Mail\Service\Sendgrid */
         $sendgrid = $request->getAttribute('Sendgrid');
         $result = $sendgrid->send($account->email, 'recovery-password-' . $lang, [
             'firstname' => $account->firstname,
@@ -86,12 +86,6 @@ class MiaRecoveryHandler extends \Mia\Core\Request\MiaRequestHandler
             'token' => $token
         ]);
 
-        /*if($result === false){
-            return new \Mia\Core\Diactoros\MiaJsonResponse(true);
-            return new \Mia\Core\Diactoros\MiaJsonErrorResponse(-15, 'No se ha podido enviar el email');
-        }*/
-
-        // Devolvemos datos del usuario
-        return new \Mia\Core\Diactoros\MiaJsonResponse(true);
+        return new JsonResponse(['success' => true]);
     }
 }
